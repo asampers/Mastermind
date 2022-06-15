@@ -2,6 +2,9 @@ module Display
 
   COLORS = "1. Red\n 2. Yellow\n 3. Blue\n 4. Green\n 5. Pink\n 6. White"
   COLOR_CODES = ["R", "Y", "B", "G", "P", "W"]
+  YES = "O"
+  MAYBE = "?"
+  NO = "X"
 
   def start_game
     puts "Welcome to Mastermind!"
@@ -28,18 +31,6 @@ module Display
     'X' = means that color is not part of the answer."
   end
 
-  def correct
-    "O"
-  end
-
-  def half_correct
-    "?"
-  end
-
-  def incorrect
-    'X'
-  end
-
   def lost
     puts "Sorry, no more guesses. You lost."
   end
@@ -54,23 +45,21 @@ class Game
 
 
   def initialize(players)
-    @answer = players.players[1].new.comp_pick_answer.join
+    @answer = players.players[1].new.comp_pick_answer
     p @answer
-    @guesser =  players.players[0].new
+    @guesser = players.players[0].new
     @current_guess = ''
   end
 
-
-
   def play
     loop do
-      puts get_guess(@guesser)
-      #display_feedback
+      get_guess(@guesser)
+      display_feedback(@current_guess, @answer)
 
       if player_has_won?(@current_guess)
         won()
         return
-      elsif @guesser.total_guesses == 0
+      elsif @guesser.total_guesses == 12
         lost()
         return 
       end
@@ -83,12 +72,48 @@ class Game
     @current_guess = guesser.make_guess
   end
 
+
+  def display_feedback(current_guess, answer)
+    @feedback = Array(current_guess.split(''))
+    wrong(@feedback, answer)
+    correct(@feedback, answer)
+    half_correct(@feedback, answer)
+    p @feedback.join
+  end
+
+  def correct(feedback, answer)
+    for i in 0..feedback.length-1
+      if feedback[i] == answer[i]
+        feedback[i] = YES 
+      end
+    end
+    return feedback
+  end
+
+  def half_correct(feedback, answer)
+    for i in 0..feedback.length-1
+      if answer.any?(feedback[i])
+        feedback[i] = MAYBE
+      end  
+    end 
+    return feedback 
+  end
+
+  def wrong(feedback, answer)
+    for i in 0..feedback.length-1
+      if answer.none?(feedback[i])
+        feedback[i] = NO
+      end
+    end
+    return feedback    
+  end
+
   def clear_guess()
     @current_guess = ""
   end
 
   def player_has_won?(current_guess)
-    @answer == current_guess
+    @answer.join == current_guess
   end
 
 end
@@ -127,13 +152,14 @@ class HumanGuesser
   attr_accessor :total_guesses
 
   def initialize
-    @total_guesses = 12
+    @total_guesses = 1
   end
 
   def make_guess
-    puts "Enter your guess."
+    puts "Enter guess ##{@total_guesses}."
     @guess = gets.chomp.upcase
-    @total_guesses -= 1
+    @total_guesses += 1
+    puts "Guess: #{@guess}"
     return @guess
   end
 
