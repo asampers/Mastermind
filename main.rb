@@ -52,61 +52,93 @@ end
 class Game 
   include Display
 
-  @@answer = [nil, nil, nil, nil]
-  @@total_guesses = 12
-
-  def initialize(human, computer)
-    
+  def initialize(players)
+    @answer = players.players[1].new.comp_pick_answer.join
+    p @answer
+    @guesser =  players.players[0].new
+    @current_guess = @guesser.make_guess
   end
 
 
 
   def play
-    loop do
-      get_guess
-      compare_guess
+    #loop do
+      puts "#{@current_guess}"
+      #display_feedback
 
-      if player_has_won?(current_guess)
-        Display.won
-        return
-      elsif @total_guesses == 0
-        Display.lost
-         return 
-      end
-    end 
+      #if player_has_won?(current_guess)
+      #  Display.won
+      #  return
+      #elsif @total_guesses == 0
+      #  Display.lost
+      #   return 
+      #end
+    #end 
   end
+
+  
 
   def player_has_won(current_guess)
     @@answer == current_guess
   end
 
-  def comp_pick_answer
-    @@answer[0] = COLOR_CODES.sample
-    @@answer[1] = COLOR_CODES.sample
-    @@answer[2] = COLOR_CODES.sample
-    @@answer[3] = COLOR_CODES.sample
-    p @@answer
-  end
 end
 
 class Player 
+
+  attr_reader :players
+
+  def initialize
+    choose_role()
+  end
+
   def choose_role
     loop do
-        puts "Which would you like to do: GUESS or SELECT ?"
-        answer = gets.chomp.downcase
-        if answer == "guess"
-          return "human"
+      puts "Which would you like to do: GUESS or SELECT ?"
+      answer = gets.chomp.downcase
+        if answer == "guess" 
+          @players = [HumanGuesser, ComputerSelector]
+          puts "The players are #{players}."
+          return HumanGuesser, ComputerSelector
         elsif answer == "select"
-          return "computer"
+          return
         elsif  
           puts "Please type GUESS or SELECT."
         end
-      end
+    end
+  end
+
+  def to_s
+    @players
   end
 
 end
 
+class HumanGuesser 
+  def make_guess
+    @total_guesses = 12
+    puts "Enter your guess."
+    @guess = gets.chomp.upcase
+    @total_guesses -= 1
+    puts @guess
+    return @guess
+  end
+
+end
+
+class ComputerSelector 
+  include Display
+
+  def comp_pick_answer
+    @answer = [nil, nil, nil, nil]
+    @answer[0] = COLOR_CODES.sample
+    @answer[1] = COLOR_CODES.sample
+    @answer[2] = COLOR_CODES.sample
+    @answer[3] = COLOR_CODES.sample
+    @answer
+  end
 
 
+end
 
-
+Game.new(Player.new).play
