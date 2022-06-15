@@ -52,34 +52,43 @@ end
 class Game 
   include Display
 
+
   def initialize(players)
     @answer = players.players[1].new.comp_pick_answer.join
     p @answer
     @guesser =  players.players[0].new
-    @current_guess = @guesser.make_guess
+    @current_guess = ''
   end
 
 
 
   def play
-    #loop do
-      puts "#{@current_guess}"
+    loop do
+      puts get_guess(@guesser)
       #display_feedback
 
-      #if player_has_won?(current_guess)
-      #  Display.won
-      #  return
-      #elsif @total_guesses == 0
-      #  Display.lost
-      #   return 
-      #end
-    #end 
+      if player_has_won?(@current_guess)
+        won()
+        return
+      elsif @guesser.total_guesses == 0
+        lost()
+        return 
+      end
+
+      clear_guess()
+    end 
   end
 
-  
+  def get_guess(guesser)
+    @current_guess = guesser.make_guess
+  end
 
-  def player_has_won(current_guess)
-    @@answer == current_guess
+  def clear_guess()
+    @current_guess = ""
+  end
+
+  def player_has_won?(current_guess)
+    @answer == current_guess
   end
 
 end
@@ -115,12 +124,16 @@ class Player
 end
 
 class HumanGuesser 
-  def make_guess
+  attr_accessor :total_guesses
+
+  def initialize
     @total_guesses = 12
+  end
+
+  def make_guess
     puts "Enter your guess."
     @guess = gets.chomp.upcase
     @total_guesses -= 1
-    puts @guess
     return @guess
   end
 
