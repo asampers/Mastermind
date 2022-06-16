@@ -44,6 +44,7 @@ class Game
   def initialize(players)
     @answer = players.players[1].new.comp_pick_answer
     #p @answer.join
+    #p @answer.uniq.length
     @guesser = players.players[0].new
     @current_guess = ''
   end
@@ -84,24 +85,24 @@ class Game
   def correct(feedback, answer, correct_colors)
     for i in 0..feedback.length-1
       if feedback[i] == answer[i]
+        feedback[i] = "+"
         correct_colors += 1
       end
     end
-    if correct_colors != 0 && correct_colors != 4
+    if correct_colors <= 3 && correct_colors > 0
       puts "#{correct_colors}: Correct"
-    end  
+    end 
+    return feedback 
   end
 
   def half_correct(feedback, answer, half_correct_colors)
     for i in 0..feedback.length-1
-      if feedback[i] == answer[i]
-        next
-      elsif answer.any?(feedback[i])
+      if answer.uniq.any?(feedback[i])
         half_correct_colors += 1
       end  
     end 
-    if half_correct_colors != 0
-      puts "#{half_correct_colors}: Right color, wrong spot" 
+    if half_correct_colors > 0
+      puts "#{half_correct_colors}: Right color, wrong spot"
     end  
   end
 
