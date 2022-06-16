@@ -2,9 +2,9 @@ module Display
 
   COLORS = "1. Red\n 2. Yellow\n 3. Blue\n 4. Green\n 5. Pink\n 6. White"
   COLOR_CODES = ["R", "Y", "B", "G", "P", "W"]
-  YES = "O"
-  MAYBE = "?"
-  NO = "X"
+  YES = "+"
+  MAYBE = "-"
+
 
   def start_game
     puts "Welcome to Mastermind!"
@@ -75,37 +75,30 @@ class Game
 
   def display_feedback(current_guess, answer)
     @feedback = Array(current_guess.split(''))
-    wrong(@feedback, answer)
     correct(@feedback, answer)
     half_correct(@feedback, answer)
-    p @feedback.join
+    puts "#{@feedback.join}: Feedback"
+    return current_guess
   end
 
   def correct(feedback, answer)
     for i in 0..feedback.length-1
       if feedback[i] == answer[i]
-        feedback[i] = YES 
+        feedback[i] = YES
       end
     end
-    return feedback
+    feedback
   end
 
   def half_correct(feedback, answer)
     for i in 0..feedback.length-1
-      if answer.any?(feedback[i])
+      if feedback[i] == answer[i]
+        next
+      elsif answer.any?(feedback[i])
         feedback[i] = MAYBE
       end  
     end 
     return feedback 
-  end
-
-  def wrong(feedback, answer)
-    for i in 0..feedback.length-1
-      if answer.none?(feedback[i])
-        feedback[i] = NO
-      end
-    end
-    return feedback    
   end
 
   def clear_guess()
@@ -159,7 +152,7 @@ class HumanGuesser
     puts "Enter guess ##{@total_guesses}."
     @guess = gets.chomp.upcase
     @total_guesses += 1
-    puts "Guess: #{@guess}"
+    puts "#{@guess}: Guess"
     return @guess
   end
 
