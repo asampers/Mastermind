@@ -44,7 +44,7 @@ class Game
   def initialize(players)
     @answer = players.players[1].new.comp_pick_answer
     #p @answer.join
-    #p @answer.uniq.length
+    #p @answer.uniq
     @guesser = players.players[0].new
     @current_guess = ''
   end
@@ -97,7 +97,7 @@ class Game
 
   def half_correct(feedback, answer, half_correct_colors)
     for i in 0..feedback.length-1
-      if answer.uniq.any?(feedback[i])
+      if answer.uniq.include?(feedback[i])
         half_correct_colors += 1
       end  
     end 
