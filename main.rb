@@ -42,8 +42,8 @@ class Game
 
 
   def initialize(players)
-    @answer = players.players[1].new.comp_pick_answer
-    #p @answer.join
+    @answer = players.players[1].new.pick_answer
+    p @answer.join
     #p @answer.uniq
     @guesser = players.players[0].new
     @current_guess = ''
@@ -77,33 +77,36 @@ class Game
     @feedback = Array(current_guess.split(''))
     @correct_colors = 0
     @half_correct_colors = 0
-    correct(@feedback, answer, @correct_colors)
-    half_correct(@feedback, answer, @half_correct_colors)
+    get_feedback(@feedback, answer, @correct_colors, @half_correct_colors)
     return current_guess
   end
 
-  def correct(feedback, answer, correct_colors)
-    for i in 0..feedback.length-1
+  def get_feedback(feedback, answer, correct_colors, half_correct_colors)
+    answer.each_with_index.map do |item, i| 
       if feedback[i] == answer[i]
-        feedback[i] = "+"
-        correct_colors += 1
+        feedback[i] = "X"
+        answer[i] = "#{item}+"
+        correct_colors += 1 
       end
     end
-    if correct_colors <= 3 && correct_colors > 0
-      puts "#{correct_colors}: Correct"
+
+  feedback.each_with_index.map do |item, i|
+    if feedback.include?(answer[i]) 
+      half_correct_colors += 1
     end 
-    return feedback 
   end
 
-  def half_correct(feedback, answer, half_correct_colors)
-    for i in 0..feedback.length-1
-      if answer.uniq.include?(feedback[i])
-        half_correct_colors += 1
-      end  
+    answer.map do |item|
+      item.gsub!("+", "")
+    end  
+
+    if correct_colors <= 3 && correct_colors > 0
+      puts "#{correct_colors}: Correct"
     end 
     if half_correct_colors > 0
       puts "#{half_correct_colors}: Right color, wrong spot"
     end  
+    return feedback
   end
 
   def clear_guess()
@@ -133,7 +136,9 @@ class Player
           puts "The players are #{players}."
           return HumanGuesser, ComputerSelector
         elsif answer == "select"
-          return
+          @players = [ComputerGuesser, HumanSelector]
+          puts "The players are #{players}."
+          return [ComputerGuesser, HumanSelector]
         elsif  
           puts "Please type GUESS or SELECT."
         end
@@ -167,13 +172,45 @@ end
 class ComputerSelector 
   include Display
 
-  def comp_pick_answer
+  def pick_answer
     @answer = [nil, nil, nil, nil]
     @answer[0] = COLOR_CODES.sample
     @answer[1] = COLOR_CODES.sample
     @answer[2] = COLOR_CODES.sample
     @answer[3] = COLOR_CODES.sample
     @answer
+  end
+
+
+end
+
+class ComputerGuesser 
+  include Display
+  attr_accessor :total_guesses
+
+  def initialize
+    @total_guesses = 1
+  end
+
+  def make_guess
+    puts "Options: #{COLOR_CODES.join(", ")}"
+    puts "Enter guess ##{@total_guesses}."
+    @guess = COLOR_CODES.sample + COLOR_CODES.sample + COLOR_CODES.sample + COLOR_CODES.sample
+    puts @guess
+    @total_guesses += 1
+    return @guess
+  end
+
+end
+
+class HumanSelector 
+  include Display
+
+  def pick_answer
+    puts "Options: #{COLOR_CODES.join(", ")}"
+    puts "Enter the secret code."
+    @answer = gets.chomp.upcase
+    @answer = Array(@answer.split(''))
   end
 
 
