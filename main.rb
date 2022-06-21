@@ -21,12 +21,21 @@ You have 12 turns to guess the combination in the correct order.\n"
 to place in 4 secret slots. The computer will have 12 turns to guess the combination in the correct order."
   end
 
+  def legal_move(input)
+    if input.length != 4 
+      puts "Please select 4 letters."
+    end
+    if input !~ /\A[#{COLOR_CODES}]+\z/  
+      puts "Please choose only letters listed in the Options."
+    end  
+  end
+
   def lost
-    puts "Sorry, no more guesses. You lost."
+    puts "The code stands the test of time. It cannot be broken!"
   end
 
   def won 
-    puts "Congrats! You won!"
+    puts "The code has been broken!"
   end
 end 
 
@@ -71,13 +80,12 @@ class Game
   include GameLogic
 
   def initialize(players)
-    if [HumanGuesser, ComputerSelector]
+    if players.players[0] == HumanGuesser
       rules_for_human_guesser
     elsif 
       rules_for_computer_guesser
     end    
     @answer = players.players[1].new.pick_answer
-    p @answer.join
     @guesser = players.players[0].new
     @current_guess = ''
   end
@@ -144,18 +152,16 @@ include Display
 
   def choose_role
     loop do
-      puts "Which would you like to do: GUESS or SELECT ?"
+      puts "Would you like to be the Code MAKER or BREAKER ?"
       answer = gets.chomp.downcase
-        if answer == "guess" 
+        if answer == "breaker" 
           @players = [HumanGuesser, ComputerSelector]
-          puts "The players are #{players}."
-          return HumanGuesser, ComputerSelector
-        elsif answer == "select"
+          return @players
+        elsif answer == "maker"
           @players = [ComputerGuesser, HumanSelector]
-          puts "The players are #{players}."
-          return [ComputerGuesser, HumanSelector]
+          return @players
         elsif  
-          puts "Please type GUESS or SELECT."
+          puts "Please type MAKER or BREAKER."
         end
     end
   end
@@ -176,9 +182,16 @@ class HumanGuesser
   end
 
   def make_guess
-    puts "Options: #{COLOR_CODES.join(", ")}"
-    puts "Enter guess ##{@total_guesses}."
-    @guess = gets.chomp.upcase
+    loop do
+      puts "Options: #{COLOR_CODES.join(", ")}"
+      puts "Enter guess ##{@total_guesses}."
+      @guess = gets.chomp.upcase
+        if @guess.length == 4 && @guess =~ /\A[#{COLOR_CODES}]+\z/
+          break
+        elsif  
+          legal_move(@guess)
+        end  
+    end  
     @total_guesses += 1
     return Array(@guess.split(''))
   end
@@ -216,11 +229,8 @@ class ComputerGuesser
     puts "Enter guess ##{@total_guesses}."
     @guess = @all_combinations.sample
     @last_guess = @guess.clone.join
-    puts "The last guess is #{@last_guess}"
     puts @guess.join
     @total_guesses += 1
-    puts "Total # of combinations is #{@all_combinations.length}"
-    puts "All guesses #{@all_guesses}"
     return @guess
   end
 
@@ -255,9 +265,16 @@ class HumanSelector
   include Display
 
   def pick_answer
-    puts "Options: #{COLOR_CODES.join(", ")}"
-    puts "Enter the secret code."
-    @answer = gets.chomp.upcase
+    loop do
+      puts "Options: #{COLOR_CODES.join(", ")}"
+      puts "Enter the secret code."
+      @answer = gets.chomp.upcase
+        if @answer.length == 4 && @answer =~ /\A[#{COLOR_CODES}]+\z/
+          break
+        elsif  
+          legal_move(@answer)
+        end 
+    end   
     @answer = Array(@answer.split(''))
   end
 
